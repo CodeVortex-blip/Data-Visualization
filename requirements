@@ -1,6 +1,6 @@
 streamlit
 wordcloud
+pdfplumber
 python-docx
 matplotlib
 seaborn
-pdfplumber
