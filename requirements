@@ -1,4 +1,7 @@
-pandas
+streamlit
+wordcloud
+python-docx
+PyPDF2
 matplotlib
 seaborn
 pdfplumber
