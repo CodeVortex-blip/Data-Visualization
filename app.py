@@ -5,6 +5,7 @@ from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 import seaborn as sns
 from collections import Counter
+import io
 
 # --- Text Extraction ---
 def extract_text(file):
@@ -15,7 +16,9 @@ def extract_text(file):
                 text += page.extract_text() or ""
         return text
     elif file.name.endswith(".docx"):
-        doc = docx.Document(file)
+        # Convert uploaded file to a BytesIO object
+        file_data = io.BytesIO(file.read())
+        doc = docx.Document(file_data)
         return "\n".join([para.text for para in doc.paragraphs])
     else:
         return ""
@@ -37,8 +40,10 @@ def plot_wordcloud(text):
 def plot_bar_chart(freq_data):
     words, counts = zip(*freq_data)
     fig, ax = plt.subplots()
-    sns.barplot(x=list(counts), y=list(words), ax=ax)
+    sns.barplot(x=list(counts), y=list(words), ax=ax, palette="viridis")
     ax.set_title("Top Words - Bar Chart")
+    ax.set_xlabel("Frequency")
+    ax.set_ylabel("Words")
     st.pyplot(fig)
 
 # --- Pie Chart ---
@@ -57,19 +62,22 @@ uploaded_file = st.file_uploader("Upload File", type=["pdf", "docx"])
 
 if uploaded_file:
     text = extract_text(uploaded_file)
-    if text:
+    if text.strip():
         st.subheader("📃 Extracted Text Preview")
         st.text(text[:500] + "..." if len(text) > 500 else text)
 
         freq_data = get_word_freq(text)
 
-        st.subheader("☁ Word Cloud")
-        plot_wordcloud(text)
+        if freq_data:
+            st.subheader("☁ Word Cloud")
+            plot_wordcloud(text)
 
-        st.subheader("📊 Bar Chart")
-        plot_bar_chart(freq_data)
+            st.subheader("📊 Bar Chart")
+            plot_bar_chart(freq_data)
 
-        st.subheader("🥧 Pie Chart")
-        plot_pie_chart(freq_data)
+            st.subheader("🥧 Pie Chart")
+            plot_pie_chart(freq_data)
+        else:
+            st.warning("No words found for visualization.")
     else:
         st.error("Could not extract text from the uploaded file.")
